@@ -48,11 +48,47 @@ body {
   padding: 24px 40px;
   background-color: var(--fn-green);
   color: white;
-  border-radius: var(--radius);
+  border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.2s;
+  border: none;
 }
 
 .btn-primary-lg:hover {
   background-color: #5da028;
+}
+
+.btn-primary-md {
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  padding: 24px 40px;
+  background-color: var(--fn-green);
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: none;
+}
+
+.btn-primary-md:hover {
+  background-color: #5da028;
+}
+
+.btn-primary-md-outline {
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  padding: 21px 37px;
+  background-color: transparent;
+  color: var(--fn-green);
+  border: 3px solid var(--fn-green);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-primary-md-outline:hover {
+  background-color: var(--fn-green);
+  color: white;
 }
