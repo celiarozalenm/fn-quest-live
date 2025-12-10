@@ -19,15 +19,15 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#1a2744] to-[#0f1829] p-4">
-      <div className="mb-8">
-        <img
-          src="/quest-logo.png"
-          alt="Forward Quest"
-          className="max-w-[600px] w-full h-auto"
-        />
-      </div>
-
+    <div
+      className="min-h-screen w-full flex flex-col items-center justify-end pb-16"
+      style={{
+        backgroundImage: 'url(/quest-logo.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       <div className="text-center">
         <p className="text-gray-400 mb-6">Login / Register with:</p>
         <div className="flex flex-col sm:flex-row gap-4">
