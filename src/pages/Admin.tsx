@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Trash2, Edit, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, Trash2, Edit, ChevronDown, ChevronRight, LogOut } from 'lucide-react'
+
+const ADMIN_SESSION_KEY = 'fn_quest_admin_session'
 
 // Mock data for development
 const mockQuests = [
@@ -22,7 +24,74 @@ const mockQuests = [
   }
 ]
 
-export default function Admin() {
+function AdminLogin({ onLogin }: { onLogin: () => void }) {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    const validUsername = import.meta.env.VITE_ADMIN_USERNAME
+    const validPassword = import.meta.env.VITE_ADMIN_PASSWORD
+
+    if (username === validUsername && password === validPassword) {
+      localStorage.setItem(ADMIN_SESSION_KEY, 'true')
+      onLogin()
+    } else {
+      setError('Invalid username or password')
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#1a2744] to-[#0f1829] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center">Admin Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium mb-2">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-3 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+                required
+              />
+            </div>
+            {error && (
+              <p className="text-red-500 text-sm">{error}</p>
+            )}
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function AdminPanel({ onLogout }: { onLogout: () => void }) {
   const [expandedQuest, setExpandedQuest] = useState<string | null>(null)
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null)
 
@@ -31,10 +100,16 @@ export default function Admin() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Quest
-          </Button>
+          <div className="flex gap-2">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Quest
+            </Button>
+            <Button variant="outline" onClick={onLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Quest List */}
@@ -152,4 +227,30 @@ export default function Admin() {
       </div>
     </div>
   )
+}
+
+export default function Admin() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const session = localStorage.getItem(ADMIN_SESSION_KEY)
+    if (session === 'true') {
+      setIsLoggedIn(true)
+    }
+  }, [])
+
+  const handleLogin = () => {
+    setIsLoggedIn(true)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem(ADMIN_SESSION_KEY)
+    setIsLoggedIn(false)
+  }
+
+  if (!isLoggedIn) {
+    return <AdminLogin onLogin={handleLogin} />
+  }
+
+  return <AdminPanel onLogout={handleLogout} />
 }
