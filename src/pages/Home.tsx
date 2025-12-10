@@ -29,8 +29,8 @@ export default function Home() {
       }}
     >
       <div className="text-center">
-        <p className="text-gray-400 mb-6">Login / Register with:</p>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <p className="text-white mb-10">Login / Register with:</p>
+        <div className="flex flex-col sm:flex-row gap-8">
           <button
             className="btn-primary-lg"
             onClick={() => handleMockLogin('community')}

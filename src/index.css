@@ -34,6 +34,8 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  font-size: 18px;
   min-height: 100vh;
 }
 
@@ -44,7 +46,7 @@ body {
 .btn-primary-lg {
   font-family: 'Lato', system-ui, -apple-system, sans-serif;
   font-size: 36px;
-  font-weight: 500;
+  font-weight: 400;
   padding: 24px 40px;
   background-color: var(--fn-green);
   color: white;
@@ -61,7 +63,7 @@ body {
 .btn-primary-md {
   font-family: 'Lato', system-ui, -apple-system, sans-serif;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 400;
   padding: 24px 40px;
   background-color: var(--fn-green);
   color: white;
@@ -78,7 +80,7 @@ body {
 .btn-primary-md-outline {
   font-family: 'Lato', system-ui, -apple-system, sans-serif;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 400;
   padding: 21px 37px;
   background-color: transparent;
   color: var(--fn-green);
