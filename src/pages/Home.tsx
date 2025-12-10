@@ -1,9 +1,16 @@
+import { useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
   const { isAuthenticated, login } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/quests')
+    }
+  }, [isAuthenticated, navigate])
 
   const handleMockLogin = (type: 'employee' | 'community') => {
     const mockEmail = type === 'employee'
@@ -14,7 +21,6 @@ export default function Home() {
   }
 
   if (isAuthenticated) {
-    navigate('/quests')
     return null
   }
 

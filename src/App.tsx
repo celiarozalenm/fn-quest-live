@@ -2,10 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import Home from '@/pages/Home'
 import QuestList from '@/pages/QuestList'
+import QuestDetail from '@/pages/QuestDetail'
 import QuestPlay from '@/pages/QuestPlay'
 import EnterInitials from '@/pages/EnterInitials'
 import Leaderboard from '@/pages/Leaderboard'
 import Admin from '@/pages/Admin'
+import Profile from '@/pages/Profile'
+import Rules from '@/pages/Rules'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
@@ -31,7 +34,7 @@ function AppRoutes() {
         path="/quest/:questId"
         element={
           <ProtectedRoute>
-            <QuestList />
+            <QuestDetail />
           </ProtectedRoute>
         }
       />
@@ -60,6 +63,22 @@ function AppRoutes() {
         }
       />
       <Route path="/admin" element={<Admin />} />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rules"
+        element={
+          <ProtectedRoute>
+            <Rules />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }

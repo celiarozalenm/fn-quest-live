@@ -18,11 +18,13 @@
   --accent-foreground: 210 40% 98%;
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
-  --border: 217 33% 17%;
+  --border: 220 13% 40%;
   --input: 217 33% 17%;
   --ring: 83 60% 45%;
   --radius: 0.5rem;
   --fn-green: #6bb72f;
+  --fn-blue-dark: #0c253f;
+  --fn-blue-light: #66b6e5;
 }
 
 * {
@@ -37,6 +39,12 @@ body {
   font-weight: 400;
   font-size: 18px;
   min-height: 100vh;
+}
+
+h1 {
+  font-size: 48px;
+  font-weight: 400;
+  color: white;
 }
 
 #root {
@@ -58,6 +66,23 @@ body {
 
 .btn-primary-lg:hover {
   background-color: #5da028;
+}
+
+.btn-secondary-lg {
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-size: 36px;
+  font-weight: 400;
+  padding: 24px 40px;
+  background-color: white;
+  color: #303030;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: none;
+}
+
+.btn-secondary-lg:hover {
+  background-color: #f0f0f0;
 }
 
 .btn-primary-md {
@@ -93,4 +118,66 @@ body {
 .btn-primary-md-outline:hover {
   background-color: var(--fn-green);
   color: white;
+}
+
+.btn-secondary-md {
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  padding: 24px 40px;
+  background-color: white;
+  color: #303030;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: none;
+}
+
+.btn-secondary-md:hover {
+  background-color: #f0f0f0;
+}
+
+.btn-primary-sm {
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  padding: 12px 24px;
+  background-color: var(--fn-green);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: none;
+}
+
+.btn-primary-sm:hover {
+  background-color: #5da028;
+}
+
+.btn-quest-home {
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  background-color: white;
+  color: #303030;
+  border-radius: 100px;
+  padding: 10px 16px 10px 8px;
+  cursor: pointer;
+  border: none;
+  width: max-content;
+  height: max-content;
+}
+
+.btn-quest-home:hover {
+  background-color: #f0f0f0;
+}
+
+.container-blue {
+  background-color: var(--fn-blue-dark);
+  border-radius: 16px;
+  padding: 40px 64px;
 }
