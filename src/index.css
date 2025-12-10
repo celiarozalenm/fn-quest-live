@@ -40,3 +40,19 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.btn-primary-lg {
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
+  font-size: 36px;
+  font-weight: 500;
+  padding: 24px 40px;
+  background-color: var(--fn-green);
+  color: white;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary-lg:hover {
+  background-color: #5da028;
+}
