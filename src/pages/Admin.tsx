@@ -45,7 +45,8 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a2744] to-[#0f1829] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#1a2744] to-[#0f1829] flex flex-col items-center justify-center p-4">
+      <img src="/logo_fn.svg" alt="Forward Networks" className="w-48 mb-8" />
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">Admin Login</CardTitle>
