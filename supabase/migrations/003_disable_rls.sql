@@ -1,0 +1,6 @@
+-- Disable RLS for admin panel access (client-side authentication)
+ALTER TABLE quests DISABLE ROW LEVEL SECURITY;
+ALTER TABLE levels DISABLE ROW LEVEL SECURITY;
+ALTER TABLE challenges DISABLE ROW LEVEL SECURITY;
+ALTER TABLE challenge_fields DISABLE ROW LEVEL SECURITY;
+ALTER TABLE challenge_hints DISABLE ROW LEVEL SECURITY;

@@ -1,5 +1,6 @@
 // Bubble Data API Client for Quest Live
 // Uses direct Data API calls (no backend workflows needed)
+// Supports test and live environments
 
 import type {
   LiveSession,
@@ -10,11 +11,46 @@ import type {
   BubbleSingleResponse,
 } from '@/types/live'
 
-const BUBBLE_API_URL = import.meta.env.VITE_BUBBLE_API_URL || 'https://quest.fwd.app/api/1.1'
 const BUBBLE_API_KEY = import.meta.env.VITE_BUBBLE_API_KEY || ''
+const BUBBLE_API_URL_TEST = import.meta.env.VITE_BUBBLE_API_URL_TEST || 'https://quest.fwd.app/version-test/api/1.1'
+const BUBBLE_API_URL_LIVE = import.meta.env.VITE_BUBBLE_API_URL_LIVE || 'https://quest.fwd.app/api/1.1'
+const DEFAULT_ENV = import.meta.env.VITE_BUBBLE_ENV || 'test'
 
 if (!BUBBLE_API_KEY) {
   console.warn('Bubble API key not configured. Please set VITE_BUBBLE_API_KEY in .env')
+}
+
+// ============================================
+// Environment Management
+// ============================================
+
+const STORAGE_KEY = 'fn-quest-live-env'
+
+function getStoredEnv(): 'test' | 'live' {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored === 'test' || stored === 'live') {
+      return stored
+    }
+  }
+  return DEFAULT_ENV as 'test' | 'live'
+}
+
+let currentEnv: 'test' | 'live' = getStoredEnv()
+
+export function setEnvironment(env: 'test' | 'live') {
+  currentEnv = env
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, env)
+  }
+}
+
+export function getEnvironment(): 'test' | 'live' {
+  return currentEnv
+}
+
+function getApiUrl(): string {
+  return currentEnv === 'live' ? BUBBLE_API_URL_LIVE : BUBBLE_API_URL_TEST
 }
 
 // Data type names in Bubble (must match exactly)
@@ -30,7 +66,7 @@ async function bubbleFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(`${BUBBLE_API_URL}${endpoint}`, {
+  const response = await fetch(`${getApiUrl()}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',

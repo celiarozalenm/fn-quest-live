@@ -6,6 +6,8 @@ import {
   adminAddWalkin,
   startCompetition,
   getCompetitionBySession,
+  getEnvironment,
+  setEnvironment,
 } from '@/api/bubble'
 import { generateFunName } from '@/lib/funNames'
 import { EVENT_DAYS, PLAYER_ICONS, type LiveSession, type LiveRegistration, type LiveCompetition } from '@/types/live'
@@ -50,6 +52,9 @@ export default function AdminLive() {
   const [walkInName, setWalkInName] = useState('')
   const [walkInCompany, setWalkInCompany] = useState('')
 
+  // Environment
+  const [env, setEnv] = useState<'test' | 'live'>(getEnvironment())
+
   // Check for existing admin session
   useEffect(() => {
     const session = localStorage.getItem('fn_quest_admin_session')
@@ -88,6 +93,15 @@ export default function AdminLive() {
   const handleLogout = () => {
     setIsAuthenticated(false)
     localStorage.removeItem('fn_quest_admin_session')
+  }
+
+  const handleEnvChange = (newEnv: 'test' | 'live') => {
+    setEnvironment(newEnv)
+    setEnv(newEnv)
+    // Reload data for new environment
+    setSelectedSession(null)
+    setRegistrations([])
+    loadSessions()
   }
 
   const loadSessions = async () => {
@@ -249,9 +263,34 @@ export default function AdminLive() {
             <h1 className="text-3xl text-white">Quest Live Admin</h1>
             <p className="text-gray-400">Manage sessions and players</p>
           </div>
-          <button onClick={handleLogout} className="text-gray-400 hover:text-white text-sm">
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            {/* Environment Toggle */}
+            <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => handleEnvChange('test')}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  env === 'test'
+                    ? 'bg-yellow-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                TEST
+              </button>
+              <button
+                onClick={() => handleEnvChange('live')}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  env === 'live'
+                    ? 'bg-green-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                LIVE
+              </button>
+            </div>
+            <button onClick={handleLogout} className="text-gray-400 hover:text-white text-sm">
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Day Selection */}

@@ -32,14 +32,18 @@ npx wrangler pages deploy dist --project-name=fn-quest-live
 
 | Variable | Value | Description |
 |----------|-------|-------------|
-| `VITE_BUBBLE_API_URL` | `https://quest.fwd.app/api/1.1` | Bubble API endpoint |
+| `VITE_BUBBLE_API_URL_TEST` | `https://quest.fwd.app/version-test/api/1.1` | Bubble Test API |
+| `VITE_BUBBLE_API_URL_LIVE` | `https://quest.fwd.app/api/1.1` | Bubble Live API |
 | `VITE_BUBBLE_API_KEY` | `your-key` | Bubble API key |
+| `VITE_BUBBLE_ENV` | `test` | Default environment (test/live) |
 | `VITE_AUTH0_DOMAIN` | `userauth.forwardnetworks.com` | Auth0 domain |
 | `VITE_AUTH0_CLIENT_ID` | `your-client-id` | Auth0 client ID |
 | `VITE_AUTH0_REDIRECT_URI` | `https://fn-quest-live.pages.dev/callback` | OAuth callback URL |
 | `VITE_USE_BUBBLE_GATEWAY` | `true` | Use Bubble as OAuth gateway |
 | `VITE_ADMIN_USERNAME` | `admin` | Admin login username |
 | `VITE_ADMIN_PASSWORD` | `your-password` | Admin login password |
+
+> **Note**: The Admin panel includes a TEST/LIVE toggle to switch between Bubble environments. This is persisted in localStorage.
 
 ---
 
