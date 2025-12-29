@@ -257,6 +257,6 @@ For each day/time combination:
 | Environment | URL |
 |-------------|-----|
 | Production | https://fn-quest-live.pages.dev |
-| Admin | https://fn-quest-live.pages.dev/admin-live |
+| Admin | https://fn-quest-live.pages.dev/admin |
 | Race Display | https://fn-quest-live.pages.dev/race/{sessionId} |
 | Lobby | https://fn-quest-live.pages.dev/lobby/{sessionId} |

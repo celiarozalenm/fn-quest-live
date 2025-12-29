@@ -56,8 +56,8 @@ function AppRoutes() {
       />
 
       {/* Admin Routes */}
-      <Route path="/admin-live" element={<AdminLive />} />
-      <Route path="/admin" element={<Admin />} />
+      <Route path="/admin" element={<AdminLive />} />
+      <Route path="/admin-legacy" element={<Admin />} />
 
       {/* Game Routes (public for spectators) */}
       <Route path="/lobby/:sessionId" element={<Lobby />} />

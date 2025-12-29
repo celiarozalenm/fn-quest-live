@@ -239,7 +239,7 @@ export default function Results() {
         {/* Back to Admin */}
         <div className="text-center mt-8">
           <button
-            onClick={() => navigate('/admin-live')}
+            onClick={() => navigate('/admin')}
             className="text-gray-400 hover:text-white"
           >
             Back to Admin Dashboard
