@@ -34,7 +34,7 @@ export default function Landing() {
       <div className="text-center max-w-2xl px-8">
         {/* Logo */}
         <img
-          src="/fn-logo.png"
+          src="/logo_fn.svg"
           alt="Forward Networks"
           className="w-48 mx-auto mb-8"
         />

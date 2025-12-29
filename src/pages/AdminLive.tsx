@@ -195,7 +195,7 @@ export default function AdminLive() {
       >
         <div className="max-w-md w-full px-4">
           <div className="text-center mb-8">
-            <img src="/fn-logo.png" alt="Forward Networks" className="w-32 mx-auto mb-4" />
+            <img src="/logo_fn.svg" alt="Forward Networks" className="w-32 mx-auto mb-4" />
             <h1 className="text-2xl text-white">Quest Live Admin</h1>
           </div>
 
