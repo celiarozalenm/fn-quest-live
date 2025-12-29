@@ -1,84 +1,71 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import Home from '@/pages/Home'
-import QuestList from '@/pages/QuestList'
-import QuestDetail from '@/pages/QuestDetail'
-import QuestPlay from '@/pages/QuestPlay'
-import EnterInitials from '@/pages/EnterInitials'
-import Leaderboard from '@/pages/Leaderboard'
+
+// Quest Live pages
+import Landing from '@/pages/Landing'
+import Callback from '@/pages/Callback'
+import Register from '@/pages/Register'
+import Confirmation from '@/pages/Confirmation'
+import AdminLive from '@/pages/AdminLive'
+import Lobby from '@/pages/Lobby'
+import Race from '@/pages/Race'
+import Results from '@/pages/Results'
+
+// Legacy Quest pages (kept for admin)
 import Admin from '@/pages/Admin'
-import Profile from '@/pages/Profile'
-import Rules from '@/pages/Rules'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-[var(--fn-blue-dark)]">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
+    )
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
   }
+
   return <>{children}</>
 }
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      {/* Quest Live Routes */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/callback" element={<Callback />} />
       <Route
-        path="/quests"
+        path="/register"
         element={
           <ProtectedRoute>
-            <QuestList />
+            <Register />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/quest/:questId"
+        path="/confirmation"
         element={
           <ProtectedRoute>
-            <QuestDetail />
+            <Confirmation />
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/quest/:questId/level/:levelId"
-        element={
-          <ProtectedRoute>
-            <QuestPlay />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/enter-initials"
-        element={
-          <ProtectedRoute>
-            <EnterInitials />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/leaderboard"
-        element={
-          <ProtectedRoute>
-            <Leaderboard />
-          </ProtectedRoute>
-        }
-      />
+
+      {/* Admin Routes */}
+      <Route path="/admin-live" element={<AdminLive />} />
       <Route path="/admin" element={<Admin />} />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/rules"
-        element={
-          <ProtectedRoute>
-            <Rules />
-          </ProtectedRoute>
-        }
-      />
+
+      {/* Game Routes (public for spectators) */}
+      <Route path="/lobby/:sessionId" element={<Lobby />} />
+      <Route path="/race/:sessionId" element={<Race />} />
+      <Route path="/results/:sessionId" element={<Results />} />
+
+      {/* Catch all - redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
