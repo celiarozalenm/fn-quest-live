@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { getCompetitionBySession, getRegistrations, getSession } from '@/api/bubble'
-import { PLAYER_ICONS, type LiveSession, type LiveRegistration } from '@/types/live'
+import { PLAYER_ICONS, type LiveSession, type LiveRegistration, type LiveCompetition } from '@/types/live'
 import { Users, Clock } from 'lucide-react'
 
 export default function Lobby() {
   const { sessionId } = useParams<{ sessionId: string }>()
 
   const [session, setSession] = useState<LiveSession | null>(null)
+  const [, setCompetition] = useState<LiveCompetition | null>(null)
   const [registrations, setRegistrations] = useState<LiveRegistration[]>([])
   const [countdown, setCountdown] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
