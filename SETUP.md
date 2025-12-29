@@ -62,7 +62,7 @@ Go to **Data** → **Data types** in Bubble and create:
 | Field | Type | Description |
 |-------|------|-------------|
 | date | date | Competition day |
-| start_time | text | "09:00", "10:00", etc. (CET) |
+| start_date | text | "09:00", "10:00", etc. (CET) |
 | total_seats | number | Default: 5 |
 | available_seats | number | Starts at 4 (1 for walk-ins) |
 | is_reserved_for_walkins | yes/no | Block from pre-registration |

@@ -142,7 +142,7 @@ export default function Race() {
               Quest Live Race
             </h1>
             <p className="text-gray-400">
-              {session?.start_time} Session
+              {session?.start_date} Session
             </p>
           </div>
 

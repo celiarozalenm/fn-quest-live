@@ -104,7 +104,7 @@ export default function Results() {
             Competition Complete!
           </h1>
           <p className="text-xl text-gray-400">
-            {session?.start_time} Session Results
+            {session?.start_date} Session Results
           </p>
         </div>
 
@@ -225,7 +225,7 @@ export default function Results() {
           <div className="bg-[var(--fn-blue-dark)] rounded-xl p-6 text-center">
             <p className="text-gray-400 mb-2">Next Competition</p>
             <p className="text-3xl text-white font-bold mb-4">
-              {nextSession.start_time} CET
+              {nextSession.start_date} CET
             </p>
             <button
               onClick={() => navigate(`/race/${nextSession._id}`)}

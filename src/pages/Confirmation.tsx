@@ -23,7 +23,7 @@ export default function Confirmation() {
 
   const { session, name } = state
   const dayInfo = EVENT_DAYS.find((d) => d.date === session.date)
-  const event = createQuestLiveEvent(session.date, session.start_time)
+  const event = createQuestLiveEvent(session.date, session.start_date)
 
   const handleGoogleCalendar = () => {
     window.open(generateGoogleCalendarUrl(event), '_blank')
@@ -66,7 +66,7 @@ export default function Confirmation() {
                   {dayInfo?.label}, 2025
                 </p>
                 <p className="text-[var(--fn-green)] text-2xl font-bold">
-                  {session.start_time} CET
+                  {session.start_date} CET
                 </p>
               </div>
             </div>

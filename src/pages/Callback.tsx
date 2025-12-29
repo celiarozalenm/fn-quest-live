@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -7,10 +7,16 @@ export default function Callback() {
   const navigate = useNavigate()
   const { handleCallback } = useAuth()
   const [error, setError] = useState<string | null>(null)
+  const processedRef = useRef(false)
 
   useEffect(() => {
+    // Prevent double processing
+    if (processedRef.current) return
+    processedRef.current = true
+
     const processCallback = async () => {
       const token = searchParams.get('token')
+      const email = searchParams.get('email')
       const code = searchParams.get('code')
       const errorParam = searchParams.get('error')
 
@@ -19,7 +25,18 @@ export default function Callback() {
         return
       }
 
-      // Handle token from Bubble gateway
+      // Handle email from Bubble gateway (simple flow)
+      if (email) {
+        const success = await handleCallback(email)
+        if (success) {
+          navigate('/register', { replace: true })
+        } else {
+          setError('Failed to authenticate user')
+        }
+        return
+      }
+
+      // Handle token from Bubble gateway (legacy)
       if (token) {
         const success = await handleCallback(token)
         if (success) {
@@ -32,8 +49,6 @@ export default function Callback() {
 
       // Handle code from direct Auth0 redirect
       if (code) {
-        // In production, exchange code for token via backend
-        // For now, redirect to Bubble to handle the exchange
         setError('Direct Auth0 code exchange not implemented. Please use Bubble gateway.')
         return
       }

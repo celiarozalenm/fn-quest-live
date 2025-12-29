@@ -3,7 +3,7 @@
 export interface LiveSession {
   _id: string
   date: string // ISO date string "2025-02-09"
-  start_time: string // "09:00", "10:00", etc. (CET)
+  start_date: string // "09:00", "10:00", etc. (CET) - named start_date in Bubble
   total_seats: number
   available_seats: number
   is_reserved_for_walkins: boolean

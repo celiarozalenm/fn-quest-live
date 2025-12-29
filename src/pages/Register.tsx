@@ -38,7 +38,7 @@ export default function Register() {
         getUserRegistrations(user.email),
       ])
 
-      setSessions(sessionsData.sort((a, b) => a.start_time.localeCompare(b.start_time)))
+      setSessions(sessionsData.sort((a, b) => a.start_date.localeCompare(b.start_date)))
       setUserRegistrations(registrationsData)
       setSelectedSession(null)
     } catch (err) {
@@ -82,7 +82,7 @@ export default function Register() {
         sendRegistrationConfirmation(user.email, {
           name,
           sessionDate: dayInfo.label,
-          sessionTime: session.start_time,
+          sessionTime: session.start_date,
           sessionId: session._id,
           registrationId: result.registration_id,
         }).catch((err) => {
@@ -193,7 +193,7 @@ export default function Register() {
                       value={session._id}
                       disabled={isFull}
                     >
-                      {session.start_time} CET - {session.available_seats} seats available
+                      {session.start_date} CET - {session.available_seats} seats available
                       {isFull ? ' (FULL)' : ''}
                     </option>
                   )

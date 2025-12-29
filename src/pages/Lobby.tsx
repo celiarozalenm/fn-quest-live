@@ -113,7 +113,7 @@ export default function Lobby() {
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-white mb-4">Get Ready!</h1>
             <p className="text-xl text-gray-300">
-              {session?.start_time} Session
+              {session?.start_date} Session
             </p>
           </div>
 

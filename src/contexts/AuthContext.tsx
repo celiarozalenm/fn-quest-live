@@ -66,12 +66,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('fn_quest_live_token')
   }
 
-  const handleCallback = async (token: string): Promise<boolean> => {
+  const handleCallback = async (emailOrToken: string): Promise<boolean> => {
     try {
       setIsLoading(true)
 
-      // Validate token with Bubble backend
-      const result = await validateToken(token)
+      // Check if it's an email (contains @) or a token
+      if (emailOrToken.includes('@')) {
+        // Direct email from Bubble gateway
+        const newUser = {
+          email: emailOrToken,
+          name: emailOrToken.split('@')[0],
+        }
+        setUser(newUser)
+        localStorage.setItem('fn_quest_live_user', JSON.stringify(newUser))
+        return true
+      }
+
+      // Validate token with Bubble backend (legacy flow)
+      const result = await validateToken(emailOrToken)
 
       if (result.valid && result.email) {
         const newUser = {
@@ -80,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         setUser(newUser)
         localStorage.setItem('fn_quest_live_user', JSON.stringify(newUser))
-        localStorage.setItem('fn_quest_live_token', token)
+        localStorage.setItem('fn_quest_live_token', emailOrToken)
         return true
       }
 

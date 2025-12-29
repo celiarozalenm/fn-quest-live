@@ -108,7 +108,7 @@ export default function AdminLive() {
     setIsLoading(true)
     try {
       const data = await getSessions(selectedDay)
-      setSessions(data.sort((a, b) => a.start_time.localeCompare(b.start_time)))
+      setSessions(data.sort((a, b) => a.start_date.localeCompare(b.start_date)))
     } catch (err) {
       console.error('Failed to load sessions:', err)
     } finally {
@@ -350,7 +350,7 @@ export default function AdminLive() {
                         }`}
                       >
                         <div className="flex justify-between items-center">
-                          <span className="font-medium">{session.start_time}</span>
+                          <span className="font-medium">{session.start_date}</span>
                           <span className="text-sm">
                             {seatsUsed}/{session.total_seats}
                           </span>
@@ -374,7 +374,7 @@ export default function AdminLive() {
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h2 className="text-2xl text-white mb-1">
-                      {selectedSession.start_time} Session
+                      {selectedSession.start_date} Session
                     </h2>
                     <p className="text-gray-400">
                       {checkedInCount} checked in / {registeredCount} registered

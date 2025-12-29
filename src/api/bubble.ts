@@ -53,12 +53,12 @@ function getApiUrl(): string {
   return currentEnv === 'live' ? BUBBLE_API_URL_LIVE : BUBBLE_API_URL_TEST
 }
 
-// Data type names in Bubble (must match exactly)
+// Data type names in Bubble (must match exactly with spaces)
 export const DATA_TYPES = {
-  SESSION: 'live-session',
-  REGISTRATION: 'live-registration',
-  COMPETITION: 'live-competition',
-  PROGRESS: 'live-progress',
+  SESSION: 'Live - Session',
+  REGISTRATION: 'Live - Registration',
+  COMPETITION: 'Live - Competition',
+  PROGRESS: 'Live - Progress',
 } as const
 
 // Generic fetch helper
