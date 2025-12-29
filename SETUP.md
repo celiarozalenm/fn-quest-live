@@ -42,8 +42,13 @@ npx wrangler pages deploy dist --project-name=fn-quest-live
 | `VITE_USE_BUBBLE_GATEWAY` | `true` | Use Bubble as OAuth gateway |
 | `VITE_ADMIN_USERNAME` | `admin` | Admin login username |
 | `VITE_ADMIN_PASSWORD` | `your-password` | Admin login password |
+| `SENDGRID_API_KEY` | `SG.xxx` | SendGrid API key (server-side) |
+| `SENDGRID_FROM_EMAIL` | `noreply@forwardnetworks.com` | Sender email |
+| `SENDGRID_FROM_NAME` | `Forward Networks Quest` | Sender name |
 
 > **Note**: The Admin panel includes a TEST/LIVE toggle to switch between Bubble environments. This is persisted in localStorage.
+
+> **Important**: `SENDGRID_*` variables are server-side only (used by Cloudflare Pages Functions). Do NOT prefix with `VITE_`.
 
 ---
 
@@ -160,7 +165,51 @@ Create a page in Bubble at `/auth-gateway` that:
 
 ---
 
-## 5. Pre-populate Sessions
+## 5. SendGrid Email Configuration
+
+The app sends confirmation emails when users register for sessions.
+
+### Setup Steps
+
+1. **Create SendGrid Account**: Go to [sendgrid.com](https://sendgrid.com) and create an account
+2. **Generate API Key**: Settings → API Keys → Create API Key (Full Access)
+3. **Verify Sender**: Settings → Sender Authentication → Verify a single sender email
+4. **Add to Cloudflare**: Go to your Pages project → Settings → Environment Variables and add:
+   - `SENDGRID_API_KEY` = your API key
+   - `SENDGRID_FROM_EMAIL` = your verified sender email
+   - `SENDGRID_FROM_NAME` = `Forward Networks Quest`
+
+### Email Templates
+
+The app includes two email templates:
+
+| Template | When Sent | Content |
+|----------|-----------|---------|
+| `registration-confirmation` | After successful registration | Session details, what to expect, arrival instructions |
+| `session-reminder` | Day before session (manual) | Reminder with session details |
+
+### Testing Emails
+
+Emails are sent via a Cloudflare Pages Function at `/api/send-email`. To test:
+
+```bash
+curl -X POST https://fn-quest-live.pages.dev/api/send-email \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "test@example.com",
+    "subject": "Test Email",
+    "template": "registration-confirmation",
+    "data": {
+      "name": "Test User",
+      "sessionDate": "Mon Feb 10",
+      "sessionTime": "10:00"
+    }
+  }'
+```
+
+---
+
+## 6. Pre-populate Sessions
 
 Run this in Bubble's app data or via workflow to create sessions:
 
@@ -176,7 +225,7 @@ For each day/time combination:
 
 ---
 
-## 6. Testing Checklist
+## 7. Testing Checklist
 
 ### Pre-Registration Flow
 - [ ] Login with Auth0 works
@@ -185,6 +234,7 @@ For each day/time combination:
 - [ ] Can't register twice for same day
 - [ ] Confirmation page shows correctly
 - [ ] Calendar links work
+- [ ] Confirmation email received
 
 ### Admin Flow
 - [ ] Admin login works
@@ -202,7 +252,7 @@ For each day/time combination:
 
 ---
 
-## 7. URLs
+## 8. URLs
 
 | Environment | URL |
 |-------------|-----|

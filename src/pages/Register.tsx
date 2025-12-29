@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { getAvailableSessions, getUserRegistrations, registerForSession } from '@/api/bubble'
+import { sendRegistrationConfirmation } from '@/api/email'
 import { EVENT_DAYS, type LiveSession, type LiveRegistration } from '@/types/live'
 import { ChevronDown, Calendar, Clock, Users } from 'lucide-react'
 
@@ -72,8 +73,24 @@ export default function Register() {
         company,
       })
 
-      // Navigate to confirmation with registration details
+      // Get session details for email and confirmation
       const session = sessions.find((s) => s._id === selectedSession)
+      const dayInfo = EVENT_DAYS.find((d) => d.date === session?.date)
+
+      // Send confirmation email (don't block navigation if it fails)
+      if (session && dayInfo) {
+        sendRegistrationConfirmation(user.email, {
+          name,
+          sessionDate: dayInfo.label,
+          sessionTime: session.start_time,
+          sessionId: session._id,
+          registrationId: result.registration_id,
+        }).catch((err) => {
+          console.error('Failed to send confirmation email:', err)
+        })
+      }
+
+      // Navigate to confirmation with registration details
       navigate('/confirmation', {
         state: {
           registrationId: result.registration_id,
