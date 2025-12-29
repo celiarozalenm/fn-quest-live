@@ -1,4 +1,5 @@
 // Bubble Data API Client for Quest Live
+// Uses direct Data API calls (no backend workflows needed)
 
 import type {
   LiveSession,
@@ -16,9 +17,76 @@ if (!BUBBLE_API_KEY) {
   console.warn('Bubble API key not configured. Please set VITE_BUBBLE_API_KEY in .env')
 }
 
-const headers: HeadersInit = {
-  'Content-Type': 'application/json',
-  ...(BUBBLE_API_KEY ? { Authorization: `Bearer ${BUBBLE_API_KEY}` } : {}),
+// Data type names in Bubble (must match exactly)
+export const DATA_TYPES = {
+  SESSION: 'live-session',
+  REGISTRATION: 'live-registration',
+  COMPETITION: 'live-competition',
+  PROGRESS: 'live-progress',
+} as const
+
+// Generic fetch helper
+async function bubbleFetch<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await fetch(`${BUBBLE_API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${BUBBLE_API_KEY}`,
+      ...options.headers,
+    },
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '')
+    throw new Error(`Bubble API error: ${response.status} ${response.statusText} - ${errorText}`)
+  }
+
+  // PATCH and DELETE return empty responses
+  const text = await response.text()
+  if (!text) {
+    return undefined as T
+  }
+  return JSON.parse(text)
+}
+
+// Generic CRUD operations
+export const bubbleApi = {
+  async getAll<T>(dataType: string, constraints?: object[]): Promise<T[]> {
+    let url = `/obj/${dataType}`
+    if (constraints && constraints.length > 0) {
+      url += `?constraints=${encodeURIComponent(JSON.stringify(constraints))}`
+    }
+    const data = await bubbleFetch<BubbleResponse<T>>(url)
+    return data.response.results
+  },
+
+  async getById<T>(dataType: string, id: string): Promise<T> {
+    const data = await bubbleFetch<BubbleSingleResponse<T>>(`/obj/${dataType}/${id}`)
+    return data.response
+  },
+
+  async create<T>(dataType: string, body: Partial<T>): Promise<{ id: string }> {
+    return bubbleFetch<{ id: string }>(`/obj/${dataType}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+
+  async update<T>(dataType: string, id: string, body: Partial<T>): Promise<void> {
+    await bubbleFetch(`/obj/${dataType}/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    })
+  },
+
+  async delete(dataType: string, id: string): Promise<void> {
+    await bubbleFetch(`/obj/${dataType}/${id}`, {
+      method: 'DELETE',
+    })
+  },
 }
 
 // ============================================
@@ -27,42 +95,23 @@ const headers: HeadersInit = {
 
 export async function getSessions(date?: string): Promise<LiveSession[]> {
   const constraints = date
-    ? JSON.stringify([{ key: 'date', constraint_type: 'equals', value: date }])
+    ? [{ key: 'date', constraint_type: 'equals', value: date }]
     : undefined
-
-  const url = new URL(`${BUBBLE_API_URL}/obj/live-session`)
-  if (constraints) url.searchParams.set('constraints', constraints)
-
-  const response = await fetch(url.toString(), { headers })
-  if (!response.ok) throw new Error('Failed to fetch sessions')
-
-  const data: BubbleResponse<LiveSession> = await response.json()
-  return data.response.results
+  return bubbleApi.getAll<LiveSession>(DATA_TYPES.SESSION, constraints)
 }
 
 export async function getSession(sessionId: string): Promise<LiveSession> {
-  const response = await fetch(`${BUBBLE_API_URL}/obj/live-session/${sessionId}`, { headers })
-  if (!response.ok) throw new Error('Failed to fetch session')
-
-  const data: BubbleSingleResponse<LiveSession> = await response.json()
-  return data.response
+  return bubbleApi.getById<LiveSession>(DATA_TYPES.SESSION, sessionId)
 }
 
 export async function getAvailableSessions(date: string): Promise<LiveSession[]> {
-  const constraints = JSON.stringify([
+  const constraints = [
     { key: 'date', constraint_type: 'equals', value: date },
     { key: 'is_active', constraint_type: 'equals', value: true },
     { key: 'is_reserved_for_walkins', constraint_type: 'equals', value: false },
-  ])
-
-  const url = new URL(`${BUBBLE_API_URL}/obj/live-session`)
-  url.searchParams.set('constraints', constraints)
-
-  const response = await fetch(url.toString(), { headers })
-  if (!response.ok) throw new Error('Failed to fetch available sessions')
-
-  const data: BubbleResponse<LiveSession> = await response.json()
-  return data.response.results
+    { key: 'available_seats', constraint_type: 'greater than', value: 0 },
+  ]
+  return bubbleApi.getAll<LiveSession>(DATA_TYPES.SESSION, constraints)
 }
 
 // ============================================
@@ -70,41 +119,17 @@ export async function getAvailableSessions(date: string): Promise<LiveSession[]>
 // ============================================
 
 export async function getRegistrations(sessionId: string): Promise<LiveRegistration[]> {
-  const constraints = JSON.stringify([
-    { key: 'session', constraint_type: 'equals', value: sessionId },
-  ])
-
-  const url = new URL(`${BUBBLE_API_URL}/obj/live-registration`)
-  url.searchParams.set('constraints', constraints)
-
-  const response = await fetch(url.toString(), { headers })
-  if (!response.ok) throw new Error('Failed to fetch registrations')
-
-  const data: BubbleResponse<LiveRegistration> = await response.json()
-  return data.response.results
+  const constraints = [{ key: 'session', constraint_type: 'equals', value: sessionId }]
+  return bubbleApi.getAll<LiveRegistration>(DATA_TYPES.REGISTRATION, constraints)
 }
 
 export async function getRegistration(registrationId: string): Promise<LiveRegistration> {
-  const response = await fetch(`${BUBBLE_API_URL}/obj/live-registration/${registrationId}`, {
-    headers,
-  })
-  if (!response.ok) throw new Error('Failed to fetch registration')
-
-  const data: BubbleSingleResponse<LiveRegistration> = await response.json()
-  return data.response
+  return bubbleApi.getById<LiveRegistration>(DATA_TYPES.REGISTRATION, registrationId)
 }
 
 export async function getUserRegistrations(email: string): Promise<LiveRegistration[]> {
-  const constraints = JSON.stringify([{ key: 'email', constraint_type: 'equals', value: email }])
-
-  const url = new URL(`${BUBBLE_API_URL}/obj/live-registration`)
-  url.searchParams.set('constraints', constraints)
-
-  const response = await fetch(url.toString(), { headers })
-  if (!response.ok) throw new Error('Failed to fetch user registrations')
-
-  const data: BubbleResponse<LiveRegistration> = await response.json()
-  return data.response.results
+  const constraints = [{ key: 'email', constraint_type: 'equals', value: email }]
+  return bubbleApi.getAll<LiveRegistration>(DATA_TYPES.REGISTRATION, constraints)
 }
 
 export async function registerForSession(data: {
@@ -113,18 +138,24 @@ export async function registerForSession(data: {
   name: string
   company: string
 }): Promise<{ registration_id: string }> {
-  const response = await fetch(`${BUBBLE_API_URL}/wf/register-for-session`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(data),
+  // Create registration
+  const result = await bubbleApi.create<LiveRegistration>(DATA_TYPES.REGISTRATION, {
+    session: data.session_id,
+    email: data.email,
+    name: data.name,
+    company: data.company,
+    registered_at: new Date().toISOString(),
+    source: 'pre-registration',
+    checked_in: false,
   })
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || 'Failed to register for session')
-  }
+  // Update session available seats
+  const session = await getSession(data.session_id)
+  await bubbleApi.update<LiveSession>(DATA_TYPES.SESSION, data.session_id, {
+    available_seats: Math.max(0, session.available_seats - 1),
+  })
 
-  return response.json()
+  return { registration_id: result.id }
 }
 
 export async function checkInPlayer(data: {
@@ -132,16 +163,12 @@ export async function checkInPlayer(data: {
   player_name: string
   player_icon: string
 }): Promise<void> {
-  const response = await fetch(`${BUBBLE_API_URL}/wf/check-in-player`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(data),
+  await bubbleApi.update<LiveRegistration>(DATA_TYPES.REGISTRATION, data.registration_id, {
+    checked_in: true,
+    checked_in_at: new Date().toISOString(),
+    player_name: data.player_name,
+    player_icon: data.player_icon,
   })
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || 'Failed to check in player')
-  }
 }
 
 // ============================================
@@ -149,58 +176,71 @@ export async function checkInPlayer(data: {
 // ============================================
 
 export async function getActiveCompetition(): Promise<LiveCompetition | null> {
-  const constraints = JSON.stringify([
+  const constraints = [
     { key: 'status', constraint_type: 'in', value: ['countdown', 'active'] },
-  ])
-
-  const url = new URL(`${BUBBLE_API_URL}/obj/live-competition`)
-  url.searchParams.set('constraints', constraints)
-
-  const response = await fetch(url.toString(), { headers })
-  if (!response.ok) throw new Error('Failed to fetch active competition')
-
-  const data: BubbleResponse<LiveCompetition> = await response.json()
-  return data.response.results[0] || null
+  ]
+  const results = await bubbleApi.getAll<LiveCompetition>(DATA_TYPES.COMPETITION, constraints)
+  return results[0] || null
 }
 
 export async function getCompetition(competitionId: string): Promise<LiveCompetition> {
-  const response = await fetch(`${BUBBLE_API_URL}/obj/live-competition/${competitionId}`, {
-    headers,
-  })
-  if (!response.ok) throw new Error('Failed to fetch competition')
-
-  const data: BubbleSingleResponse<LiveCompetition> = await response.json()
-  return data.response
+  return bubbleApi.getById<LiveCompetition>(DATA_TYPES.COMPETITION, competitionId)
 }
 
 export async function getCompetitionBySession(sessionId: string): Promise<LiveCompetition | null> {
-  const constraints = JSON.stringify([
-    { key: 'session', constraint_type: 'equals', value: sessionId },
-  ])
-
-  const url = new URL(`${BUBBLE_API_URL}/obj/live-competition`)
-  url.searchParams.set('constraints', constraints)
-
-  const response = await fetch(url.toString(), { headers })
-  if (!response.ok) throw new Error('Failed to fetch competition')
-
-  const data: BubbleResponse<LiveCompetition> = await response.json()
-  return data.response.results[0] || null
+  const constraints = [{ key: 'session', constraint_type: 'equals', value: sessionId }]
+  const results = await bubbleApi.getAll<LiveCompetition>(DATA_TYPES.COMPETITION, constraints)
+  return results[0] || null
 }
 
 export async function startCompetition(sessionId: string): Promise<{ competition_id: string }> {
-  const response = await fetch(`${BUBBLE_API_URL}/wf/start-competition`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ session_id: sessionId }),
+  const now = new Date()
+  const gameStartAt = new Date(now.getTime() + 5000) // 5 seconds from now
+
+  // Get session to determine day number
+  const session = await getSession(sessionId)
+  const dayNumber = parseInt(session.challenge_set?.replace('Day', '') || '1')
+
+  // Create competition
+  const compResult = await bubbleApi.create<LiveCompetition>(DATA_TYPES.COMPETITION, {
+    session: sessionId,
+    status: 'countdown',
+    started_at: now.toISOString(),
+    game_start_at: gameStartAt.toISOString(),
+    day_number: dayNumber,
   })
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || 'Failed to start competition')
+  // Get checked-in registrations
+  const registrations = await getRegistrations(sessionId)
+  const checkedIn = registrations.filter((r) => r.checked_in)
+
+  // Create progress records for each checked-in player
+  for (const reg of checkedIn) {
+    await bubbleApi.create<LiveProgress>(DATA_TYPES.PROGRESS, {
+      competition: compResult.id,
+      registration: reg._id,
+      current_challenge: 1,
+      hints_used: 0,
+      finished: false,
+    })
   }
 
-  return response.json()
+  // Schedule status change to "active" after 5 seconds
+  // Note: In browser, we'll handle this on the Lobby page instead
+  // For now, the admin will manually trigger or lobby polls and updates
+
+  return { competition_id: compResult.id }
+}
+
+export async function updateCompetitionStatus(
+  competitionId: string,
+  status: 'waiting' | 'countdown' | 'active' | 'finished'
+): Promise<void> {
+  const updates: Partial<LiveCompetition> = { status }
+  if (status === 'finished') {
+    updates.finished_at = new Date().toISOString()
+  }
+  await bubbleApi.update<LiveCompetition>(DATA_TYPES.COMPETITION, competitionId, updates)
 }
 
 // ============================================
@@ -208,18 +248,8 @@ export async function startCompetition(sessionId: string): Promise<{ competition
 // ============================================
 
 export async function getCompetitionProgress(competitionId: string): Promise<LiveProgress[]> {
-  const constraints = JSON.stringify([
-    { key: 'competition', constraint_type: 'equals', value: competitionId },
-  ])
-
-  const url = new URL(`${BUBBLE_API_URL}/obj/live-progress`)
-  url.searchParams.set('constraints', constraints)
-
-  const response = await fetch(url.toString(), { headers })
-  if (!response.ok) throw new Error('Failed to fetch progress')
-
-  const data: BubbleResponse<LiveProgress> = await response.json()
-  return data.response.results
+  const constraints = [{ key: 'competition', constraint_type: 'equals', value: competitionId }]
+  return bubbleApi.getAll<LiveProgress>(DATA_TYPES.PROGRESS, constraints)
 }
 
 export async function updateProgress(data: {
@@ -228,20 +258,50 @@ export async function updateProgress(data: {
   challenge_number: number
   time_seconds: number
 }): Promise<void> {
-  const response = await fetch(`${BUBBLE_API_URL}/wf/update-progress`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(data),
-  })
+  // Find the progress record for this player
+  const constraints = [
+    { key: 'competition', constraint_type: 'equals', value: data.competition_id },
+    { key: 'registration', constraint_type: 'equals', value: data.registration_id },
+  ]
+  const progress = await bubbleApi.getAll<LiveProgress>(DATA_TYPES.PROGRESS, constraints)
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || 'Failed to update progress')
+  if (progress.length === 0) {
+    throw new Error('Progress record not found')
   }
+
+  const progressId = progress[0]._id
+  const isFinished = data.challenge_number >= 5
+
+  // Build update object with dynamic challenge time field
+  const updates: Partial<LiveProgress> & Record<string, unknown> = {
+    current_challenge: data.challenge_number + 1,
+    [`challenge_${data.challenge_number}_time`]: data.time_seconds,
+  }
+
+  if (isFinished) {
+    // Calculate total time
+    const totalTime =
+      (progress[0].challenge_1_time || 0) +
+      (progress[0].challenge_2_time || 0) +
+      (progress[0].challenge_3_time || 0) +
+      (progress[0].challenge_4_time || 0) +
+      data.time_seconds
+
+    updates.finished = true
+    updates.finished_at = new Date().toISOString()
+    updates.total_time = totalTime
+
+    // Calculate rank based on finish order
+    const allProgress = await getCompetitionProgress(data.competition_id)
+    const finishedCount = allProgress.filter((p) => p.finished).length
+    updates.rank = finishedCount + 1
+  }
+
+  await bubbleApi.update<LiveProgress>(DATA_TYPES.PROGRESS, progressId, updates)
 }
 
 // ============================================
-// Admin
+// Admin Operations
 // ============================================
 
 export async function adminAddWalkin(data: {
@@ -250,22 +310,28 @@ export async function adminAddWalkin(data: {
   name: string
   company: string
 }): Promise<{ registration_id: string }> {
-  const response = await fetch(`${BUBBLE_API_URL}/wf/admin-add-walkin`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(data),
+  // Create registration as walk-in
+  const result = await bubbleApi.create<LiveRegistration>(DATA_TYPES.REGISTRATION, {
+    session: data.session_id,
+    email: data.email,
+    name: data.name,
+    company: data.company,
+    registered_at: new Date().toISOString(),
+    source: 'walk-in',
+    checked_in: false,
   })
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || 'Failed to add walk-in')
-  }
+  // Update session available seats
+  const session = await getSession(data.session_id)
+  await bubbleApi.update<LiveSession>(DATA_TYPES.SESSION, data.session_id, {
+    available_seats: Math.max(0, session.available_seats - 1),
+  })
 
-  return response.json()
+  return { registration_id: result.id }
 }
 
 // ============================================
-// Auth (via Bubble gateway)
+// Auth (simple validation - expand as needed)
 // ============================================
 
 export async function validateToken(token: string): Promise<{
@@ -273,15 +339,30 @@ export async function validateToken(token: string): Promise<{
   email?: string
   name?: string
 }> {
-  const response = await fetch(`${BUBBLE_API_URL}/wf/validate-token`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ token }),
-  })
-
-  if (!response.ok) {
+  // For now, just decode a simple token format
+  // In production, this should validate against Auth0 or Bubble's auth
+  try {
+    // Simple base64 encoded JSON token format: { email, name, exp }
+    const decoded = JSON.parse(atob(token))
+    if (decoded.exp && decoded.exp < Date.now()) {
+      return { valid: false }
+    }
+    return {
+      valid: true,
+      email: decoded.email,
+      name: decoded.name,
+    }
+  } catch {
     return { valid: false }
   }
+}
 
-  return response.json()
+// Helper to generate a simple token (for Bubble gateway)
+export function generateToken(email: string, name: string): string {
+  const payload = {
+    email,
+    name,
+    exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+  }
+  return btoa(JSON.stringify(payload))
 }

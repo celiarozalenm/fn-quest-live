@@ -103,83 +103,37 @@ Go to **Data** → **Data types** in Bubble and create:
 
 ---
 
-## 3. Bubble API Endpoints
+## 3. Bubble API Configuration
 
 ### Enable Data API
 
 Go to **Settings** → **API** → Enable:
 - [x] Enable Data API
-- [x] Enable the following data types: Live-Session, Live-Registration, Live-Competition, Live-Progress
+- [x] Enable the following data types for CRUD operations:
+  - live-session
+  - live-registration
+  - live-competition
+  - live-progress
 
-### Create Backend Workflows
+### API Access
 
-Go to **Backend workflows** and create:
+The app uses **direct Data API calls** (no backend workflows required):
 
-#### 1. register-for-session
-- **Endpoint**: `/register-for-session`
-- **Method**: POST
-- **Parameters**:
-  - session_id (text)
-  - email (text)
-  - name (text)
-  - company (text)
-- **Actions**:
-  1. Search for Live-Session where _id = session_id
-  2. Create new Live-Registration with session, email, name, company, source="pre-registration"
-  3. Make changes to session: available_seats = available_seats - 1
-  4. Return: registration_id = Result of step 2's _id
+| Operation | Endpoint | Method |
+|-----------|----------|--------|
+| Get all records | `/obj/{dataType}` | GET |
+| Get with filter | `/obj/{dataType}?constraints=[...]` | GET |
+| Get single | `/obj/{dataType}/{id}` | GET |
+| Create | `/obj/{dataType}` | POST |
+| Update | `/obj/{dataType}/{id}` | PATCH |
+| Delete | `/obj/{dataType}/{id}` | DELETE |
 
-#### 2. check-in-player
-- **Endpoint**: `/check-in-player`
-- **Method**: POST
-- **Parameters**:
-  - registration_id (text)
-  - player_name (text)
-  - player_icon (text)
-- **Actions**:
-  1. Search for Live-Registration where _id = registration_id
-  2. Make changes: checked_in = yes, checked_in_at = Current date/time, player_name, player_icon
+### Authentication
 
-#### 3. start-competition
-- **Endpoint**: `/start-competition`
-- **Method**: POST
-- **Parameters**:
-  - session_id (text)
-- **Actions**:
-  1. Search for Live-Session where _id = session_id
-  2. Create Live-Competition with session, status="countdown", started_at=Current date/time, game_start_at=Current date/time + 5 seconds
-  3. Search for checked-in registrations for this session
-  4. For each registration: Create Live-Progress with competition, registration, current_challenge=1
-  5. Schedule: Change competition status to "active" in 5 seconds
-  6. Return: competition_id
-
-#### 4. update-progress
-- **Endpoint**: `/update-progress`
-- **Method**: POST
-- **Parameters**:
-  - competition_id (text)
-  - registration_id (text)
-  - challenge_number (number)
-  - time_seconds (number)
-- **Actions**:
-  1. Search for Live-Progress where competition = competition_id AND registration = registration_id
-  2. Make changes: current_challenge = challenge_number + 1, challenge_X_time = time_seconds (dynamic field)
-  3. If challenge_number = 5: finished = yes, finished_at = Current date/time, calculate rank
-
-#### 5. admin-add-walkin
-- **Endpoint**: `/admin-add-walkin`
-- **Method**: POST
-- **Parameters**: Same as register-for-session
-- **Actions**: Same as register-for-session but source = "walk-in"
-
-#### 6. validate-token
-- **Endpoint**: `/validate-token`
-- **Method**: POST
-- **Parameters**:
-  - token (text)
-- **Actions**:
-  1. Validate the token (implementation depends on Auth0 setup)
-  2. Return: valid (yes/no), email, name
+All API calls require Bearer token authentication:
+```
+Authorization: Bearer {BUBBLE_API_KEY}
+```
 
 ---
 
