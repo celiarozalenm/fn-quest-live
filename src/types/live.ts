@@ -66,7 +66,7 @@ export interface LiveSessionWithRegistrations extends LiveSession {
 }
 
 export interface LiveProgressWithPlayer extends LiveProgress {
-  player: LiveRegistration
+  player: LiveRegistration | null
 }
 
 export interface LiveCompetitionWithProgress extends LiveCompetition {
